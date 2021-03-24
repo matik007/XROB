@@ -1,12 +1,8 @@
 // Управвление Машинкой по стенке
 
+
+
 #define SERIAL 1 // 1 - вкл вывод по uart, 0 - выкл
-
-#define WALL_LEFT 1
-#define WALL_RIGHT 2
-
-#define WALL_DISTNACE 450
-#define KI 0.2
 
 #include "MyServo.h"
 #include "Motor.h"
@@ -14,6 +10,15 @@
 #include "Lidar.h"
 #include "MyI2C.h"
 #include "PID.h"
+
+#define WALL_LEFT 1
+#define WALL_RIGHT 2
+
+uint8_t WALL_SIDE = WALL_LEFT;
+
+#define WALL_DISTNACE 450
+#define MAX_DISTANCE 600
+#define KI 0.2
 
 void setup() {
 #if SERIAL
@@ -99,28 +104,22 @@ int ComputeSignal(float set, float minAngle, float maxAngle, float kI){
 void MapControl(){
 
   Serial2.println("WELLCOME_TO_MAP");
-  
-  do{
-     BtListen();
-    servo.write(ComputeSignal(WALL_DISTNACE, 359, 1, KI));
-  } while(distance > WALL_DISTNACE+100);
-  Serial2.println("WALL_LEFT");
-  
-  
-  while(LidarGetDistanceFromeScaneAngle(359, 1) > WALL_DISTNACE * 3){
-     BtListen();
-    servo.write(ComputeSignal(WALL_DISTNACE, 179, 181, KI));
+  switch(WALL_SIDE){
+    case WALL_LEFT:
+      servo.write(ComputeSignal(WALL_DISTNACE, 179, 181, KI)); // подстраиваемся под стену слева
+      break;
+    case WALL_RIGHT:
+      servo.write(ComputeSignal(WALL_DISTNACE, 359, 1, KI)); // подстраиваемся под стену справа
+      break;
+
   }
   
-  Serial2.println("WALL_RIGHT");
-  
-  do{
-    BtListen(); 
-    servo.write(ComputeSignal(WALL_DISTNACE, 359, 1, KI));
-  } while(distance > WALL_DISTNACE);
-  
-  STATE = STOP;
-  Serial2.println("stop");  
+  MotorForward();
+
+  if(LidarGetDistanceFromeScaneAngle(359, 1) > MAX_DISTANCE){
+
+  }
+
 }
 
 void loop() {

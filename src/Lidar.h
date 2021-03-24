@@ -1,7 +1,7 @@
 #ifndef LIDAR_H
 #define LIDAR_H
 #include <Arduino.h>
-#include <RPLidar.h>
+#include "RPLidar.h"
 
 extern float distance;
 extern float angle;
